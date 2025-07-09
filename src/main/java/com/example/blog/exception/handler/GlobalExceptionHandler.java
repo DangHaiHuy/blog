@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
         apiResponse.setErrMessage(exception.getMessage());
 
-        return ResponseEntity.internalServerError().body(apiResponse);
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 
     @ExceptionHandler(value = CustomException.class)
@@ -38,14 +38,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getHttpStatusCode()).body(apiResponse);
     }
 
-    // @ExceptionHandler(value = AccessDeniedException.class)
-    // ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
-    //     ApiResponse apiResponse = new ApiResponse();
+    @ExceptionHandler(value = AccessDeniedException.class)
+    ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
+        ApiResponse apiResponse = new ApiResponse();
 
-    //     apiResponse.setCode(ErrorCode.UNAUTHORIZED.getCode());
-    //     apiResponse.setMessage(ErrorCode.UNAUTHORIZED.getMessage());
-    //     return ResponseEntity.status(ErrorCode.UNAUTHORIZED.getHttpStatusCode()).body(apiResponse);
-    // }
+        apiResponse.setCode(ErrorCode.UNAUTHORIZED.getCode());
+        apiResponse.setMessage(ErrorCode.UNAUTHORIZED.getMessage());
+        return ResponseEntity.status(ErrorCode.UNAUTHORIZED.getHttpStatusCode()).body(apiResponse);
+    }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<List<ApiResponse>> handlingValidation(MethodArgumentNotValidException exception) {
