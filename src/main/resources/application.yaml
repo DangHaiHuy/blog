@@ -27,4 +27,22 @@ spring:
       max-request-size: 10MB
   jackson:
     property-naming-strategy: SNAKE_CASE
+  mail:
+    host: smtp.gmail.com
+    post: 587
+    username: webblogtns@gmail.com
+    password: svdovfcnaehhtsfn
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  signer-key: qj6ZDxyawqxaXeiwYsUjCVy2yVv5/H7u+RMlOcu2yWk19dycEEc/dtJLUq0Zz3zb
+  valid-duration: 3600
+  refresh-duration: 7200
+
+
 
