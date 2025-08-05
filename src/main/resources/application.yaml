@@ -38,6 +38,12 @@ spring:
           auth: true
           starttls:
             enable: true
+  cache:
+    type: redis
+    cache-names: blog
+  redis:
+    host: localhost
+    port: 6379
 
 jwt:
   signer-key: qj6ZDxyawqxaXeiwYsUjCVy2yVv5/H7u+RMlOcu2yWk19dycEEc/dtJLUq0Zz3zb
