@@ -2,16 +2,21 @@ package com.example.blog.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.blog.dto.request.RegisterRequest;
+import com.example.blog.dto.request.ResetPasswordRequest;
 import com.example.blog.dto.response.ActivateResponse;
 import com.example.blog.dto.response.ApiResponse;
 import com.example.blog.dto.response.ListResponse;
+import com.example.blog.dto.response.ResetPasswordResponse;
+import com.example.blog.dto.response.SendOtpResponse;
 import com.example.blog.dto.response.UserDetailResponse;
 import com.example.blog.service.user.UserService;
 
@@ -43,5 +48,17 @@ public class UserController {
     ApiResponse<ActivateResponse> activateAccount(@RequestParam(required = true) String code,
             @RequestParam(required = true) String email) {
         return ApiResponse.<ActivateResponse>builder().result(userService.activateAccount(code, email)).build();
+    }
+
+    @PutMapping("/reset-password")
+    ApiResponse<ResetPasswordResponse> resetPassword(
+            @RequestBody @Valid ResetPasswordRequest request) {
+        return ApiResponse.<ResetPasswordResponse>builder().result(userService.resetPassword(request))
+                .build();
+    }
+
+    @GetMapping("/reset-password/get-otp/{username}")
+    ApiResponse<SendOtpResponse> getOtpResetPassword(@PathVariable String username){
+        return ApiResponse.<SendOtpResponse>builder().result(userService.getOtpResetPassword(username)).build();
     }
 }

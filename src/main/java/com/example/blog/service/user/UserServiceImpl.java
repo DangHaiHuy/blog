@@ -12,17 +12,23 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.example.blog.constant.RedisConstantPrefix;
 import com.example.blog.dto.request.RegisterRequest;
+import com.example.blog.dto.request.ResetPasswordRequest;
 import com.example.blog.dto.response.ActivateResponse;
 import com.example.blog.dto.response.ListResponse;
+import com.example.blog.dto.response.ResetPasswordResponse;
+import com.example.blog.dto.response.SendOtpResponse;
 import com.example.blog.dto.response.UserDetailResponse;
 import com.example.blog.entity.Role;
 import com.example.blog.entity.User;
 import com.example.blog.exception.CustomException;
 import com.example.blog.exception.ErrorCode;
 import com.example.blog.mapper.UserMapper;
+import com.example.blog.model.TemplateEmail;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.service.mail.EmailService;
+import com.example.blog.service.otp.OtpService;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,15 +37,17 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     private EmailService emailService;
     private TemplateEngine templateEngine;
+    private OtpService otpService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy PasswordEncoder passwordEncoder,
-            EmailService emailService, TemplateEngine templateEngine) {
+            EmailService emailService, TemplateEngine templateEngine, OtpService otpService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.templateEngine = templateEngine;
+        this.otpService = otpService;
     }
 
     @Override
@@ -98,6 +106,32 @@ public class UserServiceImpl implements UserService {
             return ActivateResponse.builder().result("Your account has been successfully activated").build();
         }
         throw new CustomException(ErrorCode.INVALID_KEY, "Cannot activate");
+    }
+
+    @Override
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Cannot find account"));
+        if (otpService.checkOtpCode(RedisConstantPrefix.RESET_PASSWORD_OTP.toString(), user.getId(),
+                request.getOtpCode())) {
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+            return ResetPasswordResponse.builder().result("Change password successfully").build();
+        } else {
+            throw new CustomException(ErrorCode.INVALID_KEY, "The code you entered is invalid");
+        }
+    }
+
+    @Override
+    public SendOtpResponse getOtpResetPassword(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Cannot find account"));
+        otpService.sendOtpEmail(user, RedisConstantPrefix.RESET_PASSWORD_OTP.toString(), user.getId(),
+                TemplateEmail.builder().title("Blog - Reset password").message(
+                        "Please use the otp code below to activate your account (Code will expire in 5 minutes):")
+                        .mainTitle("Web blog - Reset password")
+                        .build());
+        return SendOtpResponse.builder().result("Email sent successfully").build();
     }
 
 }

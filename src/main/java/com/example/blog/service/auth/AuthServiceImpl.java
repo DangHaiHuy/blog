@@ -17,10 +17,10 @@ import org.springframework.stereotype.Service;
 import com.example.blog.dto.request.AuthRequest;
 import com.example.blog.dto.request.RefreshTokenRequest;
 import com.example.blog.dto.response.AuthResponse;
-import com.example.blog.entity.InvalidatedToken;
 import com.example.blog.entity.User;
 import com.example.blog.exception.CustomException;
 import com.example.blog.exception.ErrorCode;
+import com.example.blog.model.InvalidatedToken;
 import com.example.blog.service.invalidatedToken.InvalidatedTokenService;
 import com.example.blog.service.user.UserService;
 import com.nimbusds.jose.JOSEException;
@@ -113,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
 
         boolean valid = signedJWT.verify(jwsVerifier);
 
-        if (invalidatedTokenService.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+        if (invalidatedTokenService.existsByIdWithRevoke(signedJWT.getJWTClaimsSet().getJWTID()))
             throw new CustomException(ErrorCode.UNAUTHENTICATED, "Token has expired");
         if (!(valid && expirationDate.after(new Date()))) {
             throw new CustomException(ErrorCode.UNAUTHENTICATED, "Token has expired");

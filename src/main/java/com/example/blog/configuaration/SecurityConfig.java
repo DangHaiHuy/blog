@@ -18,6 +18,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINT_POSTS = { "/auth/login", "/auth/refresh-token", "/user/register",
             "/user/activate" };
+    private final String[] PUBLIC_ENDPOINT_GETS = { "/user/reset-password/get-otp/**" };
+    private final String[] PUBLIC_ENDPOINT_PUTS = { "/user/reset-password" };
 
     private CustomJwtDecoder customJwtDecoder;
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -35,6 +37,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(config -> config
                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT_POSTS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT_GETS).permitAll()
+                .requestMatchers(HttpMethod.PUT,PUBLIC_ENDPOINT_PUTS).permitAll()
                 .anyRequest().authenticated());
 
         httpSecurity.oauth2ResourceServer(config -> config

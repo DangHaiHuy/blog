@@ -1,8 +1,8 @@
 package com.example.blog.service.invalidatedToken;
 
-import com.example.blog.entity.InvalidatedToken;
+import com.example.blog.model.InvalidatedToken;
 
 public interface InvalidatedTokenService {
-    boolean existsById(String id);
+    boolean existsByIdWithRevoke(String id);
     InvalidatedToken save(InvalidatedToken invalidatedToken);
 }
